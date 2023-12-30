@@ -1,7 +1,6 @@
-# Build a simple `static` image
+# Build a simple "hello world" image
 
-This example builds a very simple `static` image with a small handful
-of packages needed to run statically linked binaries.
+This example builds a very simple "hello world" image.
 
 It can be deployed by running the following commands:
 
