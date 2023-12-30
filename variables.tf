@@ -1,34 +1,35 @@
-/*
-Copyright 2023 Chainguard, Inc.
-SPDX-License-Identifier: Apache-2.0
-*/
-
-variable "target_repository" {
-  description = "The docker repo into which the image and attestations should be published."
+variable "base_image" {
+  description = "The base image to build on top of."
+  default     = "cgr.dev/chainguard/static:latest-glibc"
 }
 
-variable "extra_packages" {
-  type        = list(string)
-  default     = []
-  description = "Additional packages to install into this image."
+variable "base_image_policy" {
+  description = "The policy to verify the base image with."
+  default     = <<EOF
+apiVersion: policy.sigstore.dev/v1beta1
+kind: ClusterImagePolicy
+metadata:
+  name: base-policy
+spec:
+  images:
+    - glob: "**"
+  authorities:
+    - keyless:
+        url: https://fulcio.sigstore.dev
+        identities:
+          - issuer: https://token.actions.githubusercontent.com
+            subject: https://github.com/chainguard-images/images/.github/workflows/release.yaml@refs/heads/main
+      ctlog:
+        url: https://rekor.sigstore.dev
+EOF
 }
 
-variable "config" {
-  description = "The apko configuration file to build and publish."
+variable "working_dir" {
+  description = "The working directory to build from."
+  type        = string
 }
 
-variable "default_annotations" {
-  type        = map(string)
-  default     = {}
-  description = "Default annotations to apply to this image."
-}
-
-variable "check_sbom" {
-  default     = true
-  description = "Whether to run the NTIA conformance checker on the SBOMs we are attesting."
-}
-
-variable "sbom_checker" {
-  default     = "cgr.dev/chainguard/ntia-conformance-checker:latest"
-  description = "The NTIA conformance checker image to use to validate SBOMs."
+variable "importpath" {
+  description = "The go import path to ko build."
+  type        = string
 }
